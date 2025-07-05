@@ -205,3 +205,27 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# === Lunexa AI lab ===
+*.ckpt
+*.pt
+*.h5
+*.onnx
+*.bin
+*.log
+
+# data artifacts
+data/
+datasets/
+.wandb/
+
+# notebooks’ cruft
+.ipynb_checkpoints/
+__pycache__/
+.DS_Store
+
+# envs & build
+env/
+.venv/
+dist/
+build/
