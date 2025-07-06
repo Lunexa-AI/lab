@@ -51,11 +51,12 @@ def benchmark(
         baseline = results[0][0]        # first label
     base_time = dict((lbl, t) for lbl, t, _ in results)[baseline]
 
-
+    summary = {}
     for label, best, runs in results:
         factor = base_time / best
         print(
             f"{label:<25}: {best:8.3f} s "
             f"(×{factor:5.1f} faster vs. {baseline})"
         )
-    return results
+        summary[label] = best
+    return summary

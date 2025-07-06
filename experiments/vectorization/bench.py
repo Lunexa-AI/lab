@@ -7,7 +7,7 @@ across three implementations:
   
 """
 
-import time
+import datetime, pathlib,timeit
 import numpy as np
 import torch
 
@@ -39,15 +39,35 @@ def torch_mult():
     c = a * b
     return c
 
+CASES = {
+    "Python loops": py_loop,
+    "NumPy *":      np_mult,
+    "PyTorch *":    torch_mult,
+}
+
+def run_timeit(label, fn, repeat=3, number=1):
+    """Return best wall-time from timeit for parity check."""
+    timer = timeit.Timer(fn)
+    return min(timer.timeit(number=number) for _ in range(repeat))
+
 if __name__ == "__main__":
     print(f"Matrix size: {N:,} × {N:,}\n")
+    
+    bests = benchmark(CASES, repeat=3, baseline="Python loops")
+    
+    timeit_bests = {lbl: run_timeit(lbl, fn) for lbl, fn in CASES.items()}
 
-    benchmark(                                
-        {
-            "Python loops": py_loop,
-            "NumPy *":      np_mult,
-            "PyTorch *":    torch_mult,
-        },
-        repeat=3,
-        baseline="Python loops"
-    )
+    out = pathlib.Path(__file__).with_name("results.md")
+    header = "| date | variant | perf_counter_s | timeit_s |\n|---|---|---|---|\n"
+    if not out.exists():
+        out.write_text(header)
+
+    today = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    rows = [
+        f"| {today} | {lbl} | {bests[lbl]:.3f} | {timeit_bests[lbl]:.3f} |"
+        for lbl in CASES
+    ]
+    with out.open("a") as f:
+        f.write("\n".join(rows) + "\n")
+
+    print(f"\nLogged results → {out}")
