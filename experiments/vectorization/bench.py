@@ -11,18 +11,9 @@ import time
 import numpy as np
 import torch
 
-N = 10_000         
-REPEAT = 3          
+from experiments._utils.perf import benchmark
 
-def wall(func, label):
-    """Return best-of-REPEAT wall-time for func()."""
-    times = []
-    for _ in range(REPEAT):
-        t0 = time.perf_counter()
-        func()
-        times.append(time.perf_counter() - t0)
-    print(f"{label:<20}: {min(times):8.3f} s")
-    return min(times)
+N = 10_000         
 
 # 1: Pure-Python nested loops:
 def py_loop():
@@ -49,7 +40,13 @@ def torch_mult():
     return c
 
 if __name__ == "__main__":
-    print(f"Matrix size: {N:,} x {N:,}\n")
-    wall(py_loop,   "Python loops")
-    wall(np_mult,   "NumPy *")
-    wall(torch_mult,"PyTorch *")
+    print(f"Matrix size: {N:,} × {N:,}\n")
+
+    benchmark(                                
+        {
+            "Python loops": py_loop,
+            "NumPy *":      np_mult,
+            "PyTorch *":    torch_mult,
+        },
+        repeat=3,
+    )
