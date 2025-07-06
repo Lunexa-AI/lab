@@ -213,11 +213,17 @@ __marimo__/
 *.onnx
 *.bin
 *.log
+*.jpg
+*.png
+*.jpeg
+*.webp
+*.gif
 
 # data artifacts
 data/
 datasets/
 .wandb/
+/bird_or_not/
 
 # notebooks’ cruft
 .ipynb_checkpoints/
@@ -229,3 +235,4 @@ env/
 .venv/
 dist/
 build/
+
