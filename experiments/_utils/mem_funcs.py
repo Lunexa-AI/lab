@@ -1,21 +1,22 @@
-import numpy as np
-import torch
+import numpy as np, torch, time
 
-def allocate_arrays(power_max: int = 12, backend: str = "numpy", touch=True):
+def allocate_arrays(power_max=17, backend="numpy", touch=True, pause=0.0):
     """
-    Allocate arrays of size 2**k elements (float32) for k = 0..power_max.
-    Keeps them in a list so they stay resident in RAM.
+    Allocate (2**k x 2**k) float32 tensors for k = 0..power_max.
+    If *touch* is True we write to every element so pages are committed.
+    *pause* inserts a small sleep after each allocation so external samplers
+    can catch every step. Returns the list so caller keeps them alive.
     """
     arrs = []
     for k in range(power_max + 1):
         n = 2 ** k
         if backend == "numpy":
-            a = np.empty(n, dtype=np.float32)
-            if touch:
-                a.fill(0)
-        elif backend == "torch":
-            a = torch.empty(n, dtype=torch.float32, device="cpu")
-            if touch:
-                a.zero_()
+            a = (np.ones if touch else np.empty)((n, n), dtype=np.float32)
+        else:
+            tensor_ctor = torch.ones if touch else torch.empty
+            a = tensor_ctor((n, n), dtype=torch.float32, device="cpu")
         arrs.append(a)
+        if pause:
+            time.sleep(pause)
     return arrs
+
