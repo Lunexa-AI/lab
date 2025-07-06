@@ -30,15 +30,32 @@ def timeit_best(fn: Callable[[], None], repeat: int = 3) -> Tuple[float, List[fl
     runs = [_time_once(fn) for _ in range(repeat)]
     return min(runs), runs
 
+def benchmark(
+    cases: Dict[str, Callable[[], None]],
+    repeat: int = 3,
+    baseline: str | None = None,
+):
+    """
+    cases   : {"label": callable, ...}
+    repeat  : best-of-N timing per case
+    baseline: label to compare against (defaults to *first* item)
+    """
+    results: list[tuple[str, float, list[float]]] = []
 
-def benchmark(cases: Dict[str, Callable[[], None]], repeat: int = 3):
-    """
-    cases = {"label": callable, ...}
-    Prints best wall-time for each label and returns a results list.
-    """
-    results = []
     for label, fn in cases.items():
         best, runs = timeit_best(fn, repeat)
-        print(f"{label:<25}: {best:8.3f} s  (median {statistics.median(runs):.3f})")
         results.append((label, best, runs))
+
+
+    if baseline is None:
+        baseline = results[0][0]        # first label
+    base_time = dict((lbl, t) for lbl, t, _ in results)[baseline]
+
+
+    for label, best, runs in results:
+        factor = base_time / best
+        print(
+            f"{label:<25}: {best:8.3f} s "
+            f"(×{factor:5.1f} faster vs. {baseline})"
+        )
     return results

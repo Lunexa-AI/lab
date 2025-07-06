@@ -49,4 +49,5 @@ if __name__ == "__main__":
             "PyTorch *":    torch_mult,
         },
         repeat=3,
+        baseline="Python loops"
     )
